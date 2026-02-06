@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOUR NADY - موقع الطالب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes nebula-dance {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.4; }
+      25% { transform: translate(50px, -30px) scale(1.1) rotate(90deg); opacity: 0.6; }
+      50% { transform: translate(100px, 0) scale(1.2) rotate(180deg); opacity: 0.5; }
+      75% { transform: translate(50px, 30px) scale(1.1) rotate(270deg); opacity: 0.6; }
+      100% { transform: translate(0, 0) scale(1) rotate(360deg); opacity: 0.4; }
+    }
+
+    @keyframes meteor-fall {
+      0% { transform: translateY(-100vh) translateX(0) rotate(45deg); opacity: 1; }
+      100% { transform: translateY(100vh) translateX(100px) rotate(45deg); opacity: 0; }
+    }
+
+    .nebula-1 { animation: nebula-dance 8s ease-in-out infinite; }
+    .nebula-2 { animation: nebula-dance 10s ease-in-out infinite reverse; animation-delay: 2s; }
+    .floating { animation: float 3s ease-in-out infinite; }
+    .meteor { position: fixed; width: 3px; height: 100px; background: linear-gradient(180deg, #ffd700 0%, transparent 100%); animation: meteor-fall linear infinite; }
+
+    .gold-gradient {
+      background: linear-gradient(135deg, #ffd700, #ffec8b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #ffd700, #daa520);
+      transition: all 0.3s ease;
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .input-dark {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .input-dark:focus {
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+      outline: none;
+    }
+
+    .course-card { transition: all 0.3s ease; }
+    .course-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2); }
+    
+    .sidebar-item { transition: all 0.3s ease; }
+    .sidebar-item.active {
+      background: rgba(255, 215, 0, 0.2);
+      border-right: 3px solid #ffd700;
+    }
+    .sidebar-item:hover { background: rgba(255, 215, 0, 0.1); }
+
+    .nav-header {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+      border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .correct-answer { background: rgba(34, 197, 94, 0.2); border: 2px solid #22c55e; }
+    .wrong-answer { background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; }
+
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+    .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+    ::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+  </style>
+</head>
+<body class="h-full bg-black text-white overflow-auto">
+  <div id="app" class="h-full w-full">
+    <!-- SPACE BACKGROUND -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <div class="nebula-1 fixed w-96 h-96 bg-gradient-to-br from-purple-600 to-transparent rounded-full blur-3xl" style="top: 5%; right: 10%; opacity: 0.3;"></div>
+      <div class="nebula-2 fixed w-80 h-80 bg-gradient-to-br from-blue-600 to-transparent rounded-full blur-3xl" style="bottom: 15%; left: 5%; opacity: 0.25;"></div>
+      <div id="meteors-container"></div>
+      <div id="stars-container"></div>
+    </div>
+
+    <div class="relative z-10 h-full">
+      <!-- LOGIN PAGE -->
+      <div id="login-page" class="min-h-full flex flex-col items-center justify-center p-8">
+        <div class="glass-card rounded-3xl p-10 w-full max-w-md mb-8">
+          <div class="text-center mb-8">
+            <div class="text-6xl floating mb-4">🎓</div>
+            <h1 id="login-title" class="text-4xl font-black gold-gradient">NOUR NADY</h1>
+            <p class="text-yellow-200 text-lg mt-2">منصة التعليم الذكي</p>
+          </div>
+
+          <div id="login-form-container">
+            <form id="login-form" class="space-y-6">
+              <div>
+                <label class="block text-yellow-400 mb-2 font-bold">رقم الموبايل</label>
+                <input type="tel" id="phone-input" class="input-dark w-full p-4 rounded-xl" placeholder="01xxxxxxxxx" required>
+              </div>
+              <div>
+                <label class="block text-yellow-400 mb-2 font-bold">كلمة السر</label>
+                <input type="password" id="password-input" class="input-dark w-full p-4 rounded-xl" placeholder="••••••••" required>
+              </div>
+              <div id="login-error" class="text-red-400 text-center hidden text-sm"></div>
+              <div id="pending-msg" class="text-yellow-400 text-center hidden text-sm">⏳ حسابك قيد المراجعة</div>
+              <button type="submit" class="btn-gold w-full py-4 rounded-xl text-black font-bold text-lg">دخول</button>
+            </form>
+          </div>
+
+          <div class="mt-6 pt-6 border-t border-gray-600 text-center">
+            <p class="text-gray-400 mb-4">ليس لديك حساب؟</p>
+            <button onclick="showRegister()" class="w-full py-3 rounded-xl border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all font-bold">
+              إنشاء حساب جديد
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTER PAGE -->
+      <div id="register-page" class="min-h-full flex flex-col items-center justify-center p-8 hidden">
+        <div class="glass-card rounded-3xl p-10 w-full max-w-md">
+          <div class="text-center mb-8">
+            <div class="text-5xl floating mb-4">✍️</div>
+            <h1 class="text-3xl font-black gold-gradient">إنشاء حساب</h1>
+          </div>
+
+          <form id="register-form" class="space-y-5">
+            <div>
+              <label class="block text-yellow-400 mb-2 font-bold">الاسم الكامل</label>
+              <input type="text" id="reg-name" class="input-dark w-full p-4 rounded-xl" placeholder="أحمد محمد" required>
+            </div>
+            <div>
+              <label class="block text-yellow-400 mb-2 font-bold">رقم الموبايل</label>
+              <input type="tel" id="reg-phone" class="input-dark w-full p-4 rounded-xl" placeholder="01xxxxxxxxx" required>
+            </div>
+            <div>
+              <label class="block text-yellow-400 mb-2 font-bold">كلمة السر</label>
+              <input type="password" id="reg-password" class="input-dark w-full p-4 rounded-xl" placeholder="••••••••" required>
+            </div>
+            <div>
+              <label class="block text-yellow-400 mb-2 font-bold">الصف الدراسي</label>
+              <select id="reg-grade" class="input-dark w-full p-4 rounded-xl" required>
+                <option value="">اختر صفك</option>
+                <option value="prep1">🏫 أولى إعدادي</option>
+                <option value="prep2">🏫 تانية إعدادي</option>
+                <option value="prep3">🏫 تالتة إعدادي</option>
+                <option value="sec1">📚 أولى ثانوي</option>
+                <option value="sec2">📚 تانية ثانوي</option>
+                <option value="sec3">📚 تالتة ثانوي</option>
+              </select>
+            </div>
+            <div id="register-error" class="text-red-400 text-center hidden text-sm"></div>
+            <button type="submit" class="btn-gold w-full py-4 rounded-xl text-black font-bold text-lg">إنشاء</button>
+          </form>
+
+          <div class="mt-6 pt-6 border-t border-gray-600 text-center">
+            <button onclick="showLogin()" class="text-yellow-400 hover:text-yellow-300 font-bold">
+              ← العودة للدخول
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="min-h-full hidden">
+        <div class="flex h-full">
+          <!-- SIDEBAR -->
+          <aside class="w-72 glass-card min-h-full p-6 overflow-auto flex flex-col">
+            <!-- Profile -->
+            <div class="nav-header rounded-2xl p-6 mb-8">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-2xl font-bold">👨</div>
+                <div>
+                  <div id="student-name-display" class="font-bold text-lg">الطالب</div>
+                  <div id="student-grade-display" class="text-yellow-400 text-sm font-bold">الصف</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="space-y-3 flex-1 mb-8">
+              <button onclick="showSection('courses')" class="sidebar-item active nav-btn w-full text-right p-4 rounded-xl flex items-center gap-3 font-bold">
+                <span class="text-2xl">📚</span>
+                <span>الكورسات</span>
+              </button>
+              <button onclick="showSection('exams')" class="sidebar-item nav-btn w-full text-right p-4 rounded-xl flex items-center gap-3 font-bold">
+                <span class="text-2xl">📝</span>
+                <span>الامتحانات</span>
+              </button>
+              <button onclick="showSection('results')" class="sidebar-item nav-btn w-full text-right p-4 rounded-xl flex items-center gap-3 font-bold">
+                <span class="text-2xl">📊</span>
+                <span>نتائجي</span>
+              </button>
+              <button onclick="showSection('profile')" class="sidebar-item nav-btn w-full text-right p-4 rounded-xl flex items-center gap-3 font-bold">
+                <span class="text-2xl">⚙️</span>
+                <span>الإعدادات</span>
+              </button>
+            </nav>
+
+            <!-- Logout -->
+            <button onclick="logout()" class="w-full p-4 rounded-xl border-2 border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 font-bold">
+              <span>🚪</span> تسجيل الخروج
+            </button>
+          </aside>
+
+          <!-- MAIN CONTENT -->
+          <main class="flex-1 p-8 overflow-auto">
+            <!-- COURSES SECTION -->
+            <div id="courses-section" class="section">
+              <div class="mb-8">
+                <h2 class="text-4xl font-black gold-gradient mb-2">📚 الكورسات</h2>
+                <p class="text-gray-400">استمتع بمحاضرات تعليمية عالية الجودة</p>
+              </div>
+              <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+              <div id="no-courses-msg" class="text-center text-gray-400 py-16 hidden">
+                <div class="text-6xl mb-4">📭</div>
+                <p class="text-xl">لا توجد كورسات متاحة حالياً</p>
+              </div>
+            </div>
+
+            <!-- EXAMS SECTION -->
+            <div id="exams-section" class="section hidden">
+              <div class="mb-8">
+                <h2 class="text-4xl font-black gold-gradient mb-2">📝 الامتحانات</h2>
+                <p class="text-gray-400">اختبر معلوماتك وقيس تقدمك</p>
+              </div>
+              <div id="exams-list" class="space-y-4"></div>
+              <div id="no-exams-msg" class="text-center text-gray-400 py-16 hidden">
+                <div class="text-6xl mb-4">📭</div>
+                <p class="text-xl">لا توجد امتحانات متاحة</p>
+              </div>
+            </div>
+
+            <!-- RESULTS SECTION -->
+            <div id="results-section" class="section hidden">
+              <div class="mb-8">
+                <h2 class="text-4xl font-black gold-gradient mb-2">📊 نتائجي</h2>
+                <p class="text-gray-400">تابع تقدمك الدراسي</p>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="stat-box glass-card rounded-2xl p-6 text-center">
+                  <div class="text-3xl mb-2">📝</div>
+                  <div class="text-4xl font-black gold-gradient" id="total-exams">0</div>
+                  <div class="text-gray-400 mt-2">امتحانات</div>
+                </div>
+                <div class="stat-box glass-card rounded-2xl p-6 text-center">
+                  <div class="text-3xl mb-2">⭐</div>
+                  <div class="text-4xl font-black gold-gradient" id="avg-score">0</div>
+                  <div class="text-gray-400 mt-2">المتوسط</div>
+                </div>
+                <div class="stat-box glass-card rounded-2xl p-6 text-center">
+                  <div class="text-3xl mb-2">🎯</div>
+                  <div class="text-4xl font-black gold-gradient" id="best-score">0</div>
+                  <div class="text-gray-400 mt-2">أفضل نتيجة</div>
+                </div>
+              </div>
+
+              <!-- Results List -->
+              <div id="results-list" class="space-y-4"></div>
+              <div id="no-results-msg" class="text-center text-gray-400 py-16 hidden">
+                <div class="text-6xl mb-4">📭</div>
+                <p class="text-xl">لم تقم بأي امتحان بعد</p>
+              </div>
+            </div>
+
+            <!-- PROFILE SECTION -->
+            <div id="profile-section" class="section hidden">
+              <div class="mb-8">
+                <h2 class="text-4xl font-black gold-gradient mb-2">⚙️ الإعدادات</h2>
+                <p class="text-gray-400">إدارة حسابك الشخصي</p>
+              </div>
+
+              <div class="glass-card rounded-2xl p-8 max-w-2xl">
+                <div class="space-y-6">
+                  <div>
+                    <label class="block text-yellow-400 font-bold mb-3">👤 الاسم</label>
+                    <div class="bg-gray-800 p-4 rounded-xl text-white" id="profile-name">الطالب</div>
+                  </div>
+                  <div>
+                    <label class="block text-yellow-400 font-bold mb-3">📱 الموبايل</label>
+                    <div class="bg-gray-800 p-4 rounded-xl text-white" id="profile-phone">01xxxxxxxxx</div>
+                  </div>
+                  <div>
+                    <label class="block text-yellow-400 font-bold mb-3">🏫 الصف</label>
+                    <div class="bg-gray-800 p-4 rounded-xl text-white" id="profile-grade">الصف</div>
+                  </div>
+                  <div>
+                    <label class="block text-yellow-400 font-bold mb-3">📅 تاريخ التسجيل</label>
+                    <div class="bg-gray-800 p-4 rounded-xl text-white" id="profile-date">--</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div id="video-modal" class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-card rounded-3xl p-6 w-full max-w-4xl max-h-96">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="video-modal-title" class="text-2xl font-bold gold-gradient">الفيديو</h3>
+          <button onclick="closeVideo()" class="text-4xl text-yellow-400 hover:text-yellow-300">×</button>
+        </div>
+        <div id="video-player" class="video-container rounded-2xl overflow-hidden bg-black"></div>
+      </div>
+    </div>
+
+    <!-- EXAM MODAL -->
+    <div id="exam-modal" class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden flex items-center justify-center p-4 overflow-auto">
+      <div class="glass-card rounded-3xl p-8 w-full max-w-3xl my-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 id="exam-modal-title" class="text-3xl font-bold gold-gradient">الامتحان</h3>
+          <button onclick="closeExam()" class="text-4xl text-yellow-400 hover:text-yellow-300">×</button>
+        </div>
+
+        <div id="exam-questions-container" class="space-y-6 mb-8"></div>
+
+        <div id="exam-results-container" class="hidden mb-8 p-8 rounded-2xl bg-gradient-to-br from-yellow-900 to-yellow-800">
+          <h4 class="text-3xl font-bold text-center mb-6">✅ النتيجة</h4>
+          <div class="grid grid-cols-2 gap-6">
+            <div class="text-center">
+              <div id="exam-result-score" class="text-5xl font-black gold-gradient mb-2">0/0</div>
+              <div class="text-yellow-200">الإجابات الصحيحة</div>
+            </div>
+            <div class="text-center">
+              <div id="exam-result-percentage" class="text-5xl font-black gold-gradient mb-2">0%</div>
+              <div class="text-yellow-200">النسبة المئوية</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="submit-exam-btn" onclick="submitExam()" class="btn-gold w-full py-4 rounded-xl text-black font-bold text-xl">
+          📤 تسليم الامتحان
+        </button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-xl bg-green-600 text-white font-bold hidden z-50">
+      <span id="toast-message"></span>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div class="text-yellow-400 text-xl font-bold">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyACbORaTIlJlakpv2DN0_AQPPqhDDn3bPU",
+      authDomain: "mnasa2.firebaseapp.com",
+      projectId: "mnasa2",
+      storageBucket: "mnasa2.firebasestorage.app",
+      messagingSenderId: "196659450057",
+      appId: "1:196659450057:web:08b0a8aa6db633045f3d18",
+      measurementId: "G-72BN261V01"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const SHARED_APP_ID = 'nour_nady_platform';
+
+    let allData = [];
+    let currentUser = null;
+    let authUser = null;
+
+    const gradeLabels = {
+      'prep1': '🏫 أولى إعدادي',
+      'prep2': '🏫 تانية إعدادي',
+      'prep3': '🏫 تالتة إعدادي',
+      'sec1': '📚 أولى ثانوي',
+      'sec2': '📚 تانية ثانوي',
+      'sec3': '📚 تالتة ثانوي'
+    };
+
+    // Make functions global
+    window.showSection = showSection;
+    window.showLogin = showLogin;
+    window.showRegister = showRegister;
+    window.handleLogin = handleLogin;
+    window.handleRegister = handleRegister;
+    window.logout = logout;
+    window.playVideo = playVideo;
+    window.closeVideo = closeVideo;
+    window.startExam = startExam;
+    window.closeExam = closeExam;
+    window.submitExam = submitExam;
+
+    async function init() {
+      createStars();
+      createMeteors();
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          authUser = user;
+          setupDataListener();
+        } else {
+          signInAnonymously(auth).catch(console.error);
+        }
+      });
+
+      setupEventListeners();
+      checkSession();
+    }
+
+    function setupDataListener() {
+      if (!authUser) return;
+      const q = collection(db, 'artifacts', SHARED_APP_ID, 'public', 'data', 'school_content');
+      onSnapshot(q, (snapshot) => {
+        allData = snapshot.docs.map(doc => ({
+          __backendId: doc.id,
+          ...doc.data()
+        }));
+        
+        if (currentUser) {
+          // Re-sync user data to get status updates (like approval)
+          const syncedUser = allData.find(d => d.__backendId === currentUser.__backendId);
+          if (syncedUser) {
+             currentUser = syncedUser;
+             sessionStorage.setItem('user', JSON.stringify(currentUser));
+          }
+          updateDashboard();
+        }
+      });
+    }
+
+    function createStars() {
+      const container = document.getElementById('stars-container');
+      for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'absolute bg-white rounded-full opacity-50 animate-pulse';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        container.appendChild(star);
+      }
+    }
+
+    function createMeteors() {
+      const container = document.getElementById('meteors-container');
+      setInterval(() => {
+        const meteor = document.createElement('div');
+        meteor.className = 'meteor';
+        meteor.style.left = Math.random() * window.innerWidth + 'px';
+        meteor.style.top = '-100px';
+        meteor.style.animationDuration = (2 + Math.random() * 2) + 's';
+        container.appendChild(meteor);
+        setTimeout(() => meteor.remove(), 4000);
+      }, 2000);
+    }
+
+    function setupEventListeners() {
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('register-form').addEventListener('submit', handleRegister);
+    }
+
+    function showLogin() {
+      document.getElementById('login-page').classList.remove('hidden');
+      document.getElementById('register-page').classList.add('hidden');
+    }
+
+    function showRegister() {
+      document.getElementById('register-page').classList.remove('hidden');
+      document.getElementById('login-page').classList.add('hidden');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('phone-input').value.trim();
+      const password = document.getElementById('password-input').value;
+      const errorEl = document.getElementById('login-error');
+      const pendingEl = document.getElementById('pending-msg');
+
+      errorEl.classList.add('hidden');
+      pendingEl.classList.add('hidden');
+
+      // Security Note: In a real production app, login should happen via Firebase Auth, not by filtering a list.
+      const student = allData.find(d => d.type === 'student' && d.phone === phone && d.password === password);
+
+      if (!student) {
+        errorEl.textContent = '❌ بيانات غير صحيحة';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      if (student.status === 'pending') {
+        pendingEl.classList.remove('hidden');
+        return;
+      }
+
+      if (student.status === 'rejected') {
+        errorEl.textContent = '❌ تم رفض حسابك';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = student;
+      sessionStorage.setItem('user', JSON.stringify(student));
+      document.getElementById('login-form').reset();
+      showDashboard();
+      showToast('🎉 مرحباً بك!');
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const grade = document.getElementById('reg-grade').value;
+      const errorEl = document.getElementById('register-error');
+
+      if (allData.find(d => d.type === 'student' && d.phone === phone)) {
+        errorEl.textContent = '❌ هذا الرقم مسجل بالفعل';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      showLoading();
+      try {
+        await addDoc(collection(db, 'artifacts', SHARED_APP_ID, 'public', 'data', 'school_content'), {
+          type: 'student',
+          name,
+          phone,
+          password,
+          grade,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        showToast('✅ تم إرسال طلبك للمشرف');
+        document.getElementById('register-form').reset();
+        showLogin();
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = '❌ حدث خطأ في التسجيل';
+        errorEl.classList.remove('hidden');
+      }
+      hideLoading();
+    }
+
+    function showDashboard() {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('register-page').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      updateDashboard();
+    }
+
+    function updateDashboard() {
+      if (!currentUser) return;
+
+      document.getElementById('student-name-display').textContent = currentUser.name;
+      document.getElementById('student-grade-display').textContent = gradeLabels[currentUser.grade] || currentUser.grade;
+      document.getElementById('profile-name').textContent = currentUser.name;
+      document.getElementById('profile-phone').textContent = currentUser.phone;
+      document.getElementById('profile-grade').textContent = gradeLabels[currentUser.grade] || currentUser.grade;
+      document.getElementById('profile-date').textContent = new Date(currentUser.createdAt).toLocaleDateString('ar-EG');
+
+      updateCourses();
+      updateExams();
+      updateResults();
+    }
+
+    function updateCourses() {
+      const courses = allData.filter(d => d.type === 'course' && d.grade === currentUser.grade);
+      const grid = document.getElementById('courses-grid');
+
+      if (courses.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('no-courses-msg').classList.remove('hidden');
+      } else {
+        document.getElementById('no-courses-msg').classList.add('hidden');
+        grid.innerHTML = courses.map(c => `
+          <div class="course-card glass-card rounded-2xl overflow-hidden flex flex-col">
+            <div class="h-40 bg-gradient-to-br from-yellow-600 to-yellow-800 flex items-center justify-center">
+              <span class="text-6xl">📚</span>
+            </div>
+            <div class="p-6 flex-1 flex flex-col">
+              <h3 class="text-xl font-bold gold-gradient mb-2">${c.courseTitle}</h3>
+              <p class="text-gray-400 text-sm mb-4 flex-1">${c.courseDescription || 'محاضرة تعليمية'}</p>
+              <button onclick="playVideo('${c.__backendId}')" class="btn-gold w-full py-3 rounded-xl text-black font-bold">
+                ▶️ مشاهدة
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function updateExams() {
+      const exams = allData.filter(d => d.type === 'exam' && d.grade === currentUser.grade);
+      const list = document.getElementById('exams-list');
+
+      if (exams.length === 0) {
+        list.innerHTML = '';
+        document.getElementById('no-exams-msg').classList.remove('hidden');
+      } else {
+        document.getElementById('no-exams-msg').classList.add('hidden');
+        list.innerHTML = exams.map(e => {
+          const questions = allData.filter(d => d.type === 'question' && d.courseId === e.__backendId);
+          const done = allData.find(d => d.type === 'result' && d.studentId === currentUser.__backendId && d.courseId === e.__backendId);
+          return `
+            <div class="glass-card rounded-2xl p-6 flex justify-between items-center">
+              <div class="flex-1">
+                <h3 class="text-xl font-bold gold-gradient">${e.courseTitle}</h3>
+                <p class="text-gray-400">${questions.length} أسئلة</p>
+                ${done ? `<p class="text-green-400 font-bold">✅ اكتملت - ${done.score}%</p>` : ''}
+              </div>
+              <button onclick="startExam('${e.__backendId}')" class="btn-gold px-6 py-3 rounded-xl text-black font-bold">
+                📝 ${done ? 'إعادة' : 'ابدأ'}
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function updateResults() {
+      const results = allData.filter(d => d.type === 'result' && d.studentId === currentUser.__backendId);
+      const list = document.getElementById('results-list');
+
+      if (results.length === 0) {
+        list.innerHTML = '';
+        document.getElementById('no-results-msg').classList.remove('hidden');
+        document.getElementById('total-exams').textContent = '0';
+        document.getElementById('avg-score').textContent = '0';
+        document.getElementById('best-score').textContent = '0';
+      } else {
+        document.getElementById('no-results-msg').classList.add('hidden');
+        const avg = Math.round(results.reduce((a, b) => a + b.score, 0) / results.length);
+        const best = Math.max(...results.map(r => r.score));
+
+        document.getElementById('total-exams').textContent = results.length;
+        document.getElementById('avg-score').textContent = avg;
+        document.getElementById('best-score').textContent = best;
+
+        list.innerHTML = results.map(r => {
+          const exam = allData.find(d => d.__backendId === r.courseId);
+          const resultColor = r.score >= 70 ? 'text-green-400' : r.score >= 50 ? 'text-yellow-400' : 'text-red-400';
+          return `
+            <div class="glass-card rounded-2xl p-6 flex justify-between items-center">
+              <div>
+                <h3 class="text-lg font-bold">${exam ? exam.courseTitle : 'امتحان'}</h3>
+                <p class="text-gray-400">${new Date(r.createdAt).toLocaleDateString('ar-EG')}</p>
+              </div>
+              <div class="text-right">
+                <div class="text-4xl font-black gold-gradient">${r.score}%</div>
+                <div class="${resultColor} text-sm font-bold">
+                  ${r.score >= 70 ? ' ممتاز' : r.score >= 50 ? ' جيد' : '⚠️ يحتاج'}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(name + '-section').classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      event.target.closest('.nav-btn').classList.add('active');
+    }
+
+    async function playVideo(courseId) {
+      const course = allData.find(d => d.__backendId === courseId);
+      if (!course) return;
+
+      document.getElementById('video-modal-title').textContent = course.courseTitle;
+      const player = document.getElementById('video-player');
+
+      if (course.videoType === 'youtube' && course.videoUrl) {
+        const id = course.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|embed\/)([^&\s]+)/)?.[1];
+        if (id) {
+          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
+        }
+      } else if (course.videoUrl) {
+        player.innerHTML = `<video controls src="${course.videoUrl}"></video>`;
+      }
+
+      document.getElementById('video-modal').classList.remove('hidden');
+    }
+
+    function closeVideo() {
+      document.getElementById('video-modal').classList.add('hidden');
+      document.getElementById('video-player').innerHTML = '';
+    }
+
+    async function startExam(examId) {
+      const exam = allData.find(d => d.__backendId === examId);
+      if (!exam) return;
+
+      const questions = allData.filter(d => d.type === 'question' && d.courseId === examId);
+      if (questions.length === 0) {
+        showToast('❌ لا توجد أسئلة');
+        return;
+      }
+
+      document.getElementById('exam-modal-title').textContent = exam.courseTitle;
+      const container = document.getElementById('exam-questions-container');
+
+      container.innerHTML = questions.map((q, i) => {
+        const opts = JSON.parse(q.options || '{}');
+        return `
+          <div class="question-block glass-card rounded-2xl p-6" data-question-id="${q.__backendId}" data-correct="${q.correctAnswer}">
+            <h4 class="text-lg font-bold text-yellow-400 mb-4">❓ السؤال ${i + 1}: ${q.questionText}</h4>
+            <div class="space-y-3">
+              ${['a', 'b', 'c', 'd'].map(opt => `
+                <label class="block p-4 rounded-xl border-2 border-gray-600 cursor-pointer hover:border-yellow-400 transition-all option-label">
+                  <input type="radio" name="q-${i}" value="${opt}" class="hidden">
+                  <span class="font-bold text-yellow-400">${opt.toUpperCase()}.</span>
+                  <span class="ml-3">${opts[opt] || ''}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.option-label').forEach(label => {
+        label.addEventListener('click', function() {
+          this.closest('.question-block').querySelectorAll('.option-label').forEach(l => {
+            l.classList.remove('border-yellow-400', 'bg-yellow-900', 'bg-opacity-30');
+            l.classList.add('border-gray-600');
+          });
+          this.classList.add('border-yellow-400', 'bg-yellow-900', 'bg-opacity-30');
+          this.querySelector('input').checked = true;
+        });
+      });
+
+      document.getElementById('exam-results-container').classList.add('hidden');
+      document.getElementById('submit-exam-btn').classList.remove('hidden');
+      document.getElementById('exam-modal').classList.remove('hidden');
+      document.getElementById('exam-modal').dataset.examId = examId;
+    }
+
+    async function submitExam() {
+      const examId = document.getElementById('exam-modal').dataset.examId;
+      const blocks = document.querySelectorAll('.question-block');
+      let correct = 0;
+      let total = blocks.length;
+
+      blocks.forEach(block => {
+        const ans = block.dataset.correct;
+        const sel = block.querySelector('input:checked')?.value;
+
+        block.querySelectorAll('.option-label').forEach(label => {
+          const opt = label.querySelector('input').value;
+          if (opt === ans) {
+            label.classList.add('correct-answer');
+          }
+          if (sel && opt === sel && opt !== ans) {
+            label.classList.add('wrong-answer');
+          }
+        });
+
+        if (sel === ans) correct++;
+      });
+
+      const percentage = Math.round((correct / total) * 100);
+
+      document.getElementById('exam-result-score').textContent = `${correct}/${total}`;
+      document.getElementById('exam-result-percentage').textContent = `${percentage}%`;
+      document.getElementById('exam-results-container').classList.remove('hidden');
+      document.getElementById('submit-exam-btn').classList.add('hidden');
+
+      showLoading();
+      try {
+        await addDoc(collection(db, 'artifacts', SHARED_APP_ID, 'public', 'data', 'school_content'), {
+          type: 'result',
+          courseId: examId,
+          studentId: currentUser.__backendId,
+          score: percentage,
+          createdAt: new Date().toISOString()
+        });
+        showToast('✅ تم حفظ النتيجة');
+      } catch (err) {
+        console.error(err);
+        showToast('❌ خطأ في الحفظ');
+      }
+      hideLoading();
+    }
+
+    function closeExam() {
+      document.getElementById('exam-modal').classList.add('hidden');
+    }
+
+    function checkSession() {
+      const saved = sessionStorage.getItem('user');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        showDashboard();
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      sessionStorage.removeItem('user');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('login-page').classList.remove('hidden');
+      document.getElementById('register-page').classList.add('hidden');
+      document.getElementById('login-form').reset();
+      showToast('👋 تم تسجيل الخروج');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function showLoading() {
+      document.getElementById('loading').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').classList.add('hidden');
+    }
+
+    init();
+  </script>
+</body>
+</html>
